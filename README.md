@@ -1,2 +1,1 @@
-# Note_Taker
-Input notes and save them
+# Note Taker Starter Code
