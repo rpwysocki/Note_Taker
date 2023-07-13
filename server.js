@@ -13,8 +13,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.get('/api/notes', (req, res) => {
-    res.json(db)
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Failed to read the database.' });
+    }
+
+    res.json(JSON.parse(data))
 });
+})
 
 // Endpoint to handle POST requests to create a new note
 app.post('/api/notes', (req, res) => {
@@ -65,27 +72,30 @@ app.delete('/api/notes/:id', (req, res) => {
   
       // Parse the existing notes data
       const notes = JSON.parse(data);
+      console.log(notes)
+      const filteredNotes = notes.filter(note => note.id != req.params.id);
+      console.log(filteredNotes)
   
-      // Find the index of the note with the provided ID
-      const noteIndex = notes.findIndex(note => note.id === req.params.id);
+      // // Find the index of the note with the provided ID
+      // const noteIndex = notes.findIndex(note => note.id === req.params.id);
   
-      // If note not found, return an error
-      if (noteIndex === -1) {
-        return res.status(404).json({ error: 'Note not found.' });
-      }
+      // // If note not found, return an error
+      // if (noteIndex === -1) {
+      //   return res.status(404).json({ error: 'Note not found.' });
+      // }
   
-      // Remove the note from the notes array
-      const deletedNote = notes.splice(noteIndex, 1)[0];
+      // // Remove the note from the notes array
+      // const deletedNote = notes.splice(noteIndex, 1)[0];
   
       // Write the updated notes back to db.json
-      fs.writeFile('./db/db.json', JSON.stringify(notes), 'utf8', (err) => {
+      fs.writeFile('./db/db.json', JSON.stringify(filteredNotes), 'utf8', (err) => {
         if (err) {
           console.error(err);
           return res.status(500).json({ error: 'Failed to write to the database.' });
         }
   
         // Return the deleted note to the client
-        res.json(deletedNote);
+        res.json(filteredNotes);
       });
     });
   });
